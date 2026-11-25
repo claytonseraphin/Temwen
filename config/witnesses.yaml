@@ -1,0 +1,17 @@
+witnesses:
+  w1:
+    name: "Colony and Revolution"
+    era: { start: null, end: "1804-01-01" }
+    prompt: ../prompts/witness-1.md
+    prompt_version: v3
+    source_shelf: w1          # matches the `era` tag on chunks in Postgres
+    handoff_to: [w2]
+    voice: kreyol-voice-a
+  w2:
+    name: "Early Nation and the Debt"
+    era: { c}
+    prompt: ../prompts/witness-2.md
+    prompt_version: v1
+    source_shelf: w2
+    handoff_to: []
+    voice: kreyol-voice-b,
