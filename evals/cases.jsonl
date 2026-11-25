@@ -1,0 +1,5 @@
+{"case_id": "w1-0001", "witness": "w1", "lang": "ht",
+ "question": "Ki moun ki te Tousen Louvèti?",
+ "source_ids": ["w1-001", "w1-002", "w1-003"],
+ "reference_answers": ["Tousen Louvèti te yon ansyen esklav… Okòmansman, li te goumen bò kote Panyòl yo…"],
+ "expect": {"must_include": ["1794", "1802", "1803"], "must_not_include": ["kreye repiblik"], "expected_sources": ["w1-003"], "should_handoff": false}}

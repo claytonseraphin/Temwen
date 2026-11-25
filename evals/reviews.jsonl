@@ -1,0 +1,4 @@
+{"case_id": "w1-0001", "reviewed_at": "2026-11-23", "model": "qwen3.5-9b-mlx-4bit", "prompt_version": "witness-1@a3f9c2",
+ "model_answer": "… Li te kòmanse pou l goumen bò kote Panyòl yo …",
+ "corrected_answer": "… Okòmansman, li te goumen bò kote Panyòl yo …",
+ "issues": ["kreyol_phrasing", "citation_overlist"], "notes": "'kòmanse pou l goumen' sounds unnatural"}

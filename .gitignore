@@ -26,9 +26,25 @@ profile.cov
 go.work
 go.work.sum
 
-# env file
-.env
-
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Generated eval results
+evals/runs/
+
+# Full source library (large and/or copyrighted; lives in object storage)
+data/library/
+
+# Model weights
+models/
+*.safetensors
+*.gguf
+
+# Secrets
+.env
+*.env
+
+# Build output and OS clutter
+/bin/
+.DS_Store
