@@ -1,3 +1,26 @@
+default_model: qwen-local
+
+models:
+  qwen-local:
+    provider: openai-compatible
+    url: http://localhost:8080/v1/chat/completions
+    model: default_model
+    max_tokens: 250
+    temperature: 0.3
+    timeout: 60s
+    extra:
+      chat_template_kwargs:
+        enable_thinking: false
+
+  claude-haiku:
+    provider: anthropic
+    model: claude-haiku-5-5
+    api_key_env: ANTHROPIC_API_KEY
+    max_tokens: 250
+    temperature: 0.3
+    timeout: 30s
+
+
 witnesses:
   w1:
     name: "Colony and Revolution"
