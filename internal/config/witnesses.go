@@ -12,6 +12,7 @@ import (
 )
 
 type Date struct{ time.Time }
+type Duration struct{ time.Duration }
 
 // helper function to convert registry era date
 func (d *Date) UnmarshalYAML(n *yaml.Node) error {
@@ -23,8 +24,19 @@ func (d *Date) UnmarshalYAML(n *yaml.Node) error {
 	return nil
 }
 
+func (d *Duration) UnmarshalYAML(n *yaml.Node) error {
+	v, err := time.ParseDuration(n.Value)
+	if err != nil {
+		return fmt.Errorf("invalid duration %q, want e.g. 60s or 2m: %w", n.Value, err)
+	}
+	d.Duration = v
+	return nil
+}
+
 type Registry struct {
-	Witnesses map[string]Witness `yaml:"witnesses"`
+	Witnesses    map[string]Witness `yaml:"witnesses"`
+	DefaultModel string             `yaml:"default_model"`
+	Models       map[string]Model   `yaml:"models"`
 }
 
 type Era struct {
@@ -44,6 +56,18 @@ type Witness struct {
 	PromptVersion string   `yaml:"-"`
 }
 
+type Model struct {
+	ID          string         `yaml:"id"`
+	Provider    string         `yaml:"provider"`
+	URL         string         `yaml:"url"`
+	Model       string         `yaml:"model"`
+	APIKeyEnv   string         `yaml:"api_key_env"`
+	MaxTokens   int            `yaml:"max_tokens"`
+	Temperature float32        `yaml:"temperature"`
+	Timeout     Duration       `yaml:"timeout"`
+	Extra       map[string]any `yaml:"extra"`
+}
+
 func ReadPrompt(path string) (string, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -59,10 +83,6 @@ func ComputePromptVersion(input string) string {
 }
 
 func (reg *Registry) validate() error {
-	for key := range reg.Witnesses {
-		fmt.Println("witness key:", key)
-	}
-
 	for id, w := range reg.Witnesses {
 		for _, target := range w.HandoffTo {
 			if target == id {
@@ -73,6 +93,34 @@ func (reg *Registry) validate() error {
 			}
 		}
 	}
+
+	return nil
+}
+
+var knownProviders = map[string]bool{
+	"openai-compatible": true,
+	"anthropic":         true,
+}
+
+func (reg *Registry) validateModels() error {
+	if _, ok := reg.Models[reg.DefaultModel]; !ok {
+		return fmt.Errorf("default_model %q is not a defined model", reg.DefaultModel)
+	}
+
+	for id, m := range reg.Models {
+		if !knownProviders[m.Provider] {
+			return fmt.Errorf("model %s: unknown provider %q", id, m.Provider)
+		}
+
+		if m.Provider == "openai-compatible" && m.URL == "" {
+			return fmt.Errorf("model %s: url is required for provider %q", id, m.Provider)
+		}
+
+		if m.MaxTokens <= 0 {
+			return fmt.Errorf("model %s: max_tokens must be greater than 0, got %d", id, m.MaxTokens)
+		}
+	}
+
 	return nil
 }
 
@@ -103,8 +151,18 @@ func Load(path string) (*Registry, error) {
 
 		reg.Witnesses[id] = w
 	}
+	fmt.Printf("Registry: %v", reg.DefaultModel)
+
+	for id, m := range reg.Models {
+		m.ID = id
+		reg.Models[id] = m
+	}
 
 	if err := reg.validate(); err != nil {
+		return nil, err
+	}
+
+	if err := reg.validateModels(); err != nil {
 		return nil, err
 	}
 
